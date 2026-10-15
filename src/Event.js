@@ -1,3 +1,7 @@
+// think of events as radio waves
+// the inputmanager is the radio station
+// whoever wants to listen, can listen
+
 export class Event {
 
     constructor() {

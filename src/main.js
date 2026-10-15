@@ -1,9 +1,11 @@
-import { Application, Assets, Sprite, Rectangle  } from "pixi.js";
+import { Application, Assets, Sprite, Rectangle, Graphics  } from "pixi.js";
 import ToolsManager from "./managers/ToolsManager.js";
+import InputManager from "./managers/InputManager.js";
 
 import "../style.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 
+// Used for initializing the app and setting up the tools on the left hand side
 (async () => {
     // Create a new application
     const app = new Application();
@@ -16,13 +18,28 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
         resizeTo: container
     });
 
+    console.log(container);
+
+    InputManager.initialize(app)
+
     ToolsManager.addToolGroup("Shapes",["fa-solid","fa-shapes"], [
         ToolsManager.getTool("Ellipse",["fa-regular","fa-circle"], () => {
-            
-            
+            // Where we put code for "what happenes when this tool gets clicked"
+            const circle = new Graphics()
+                .circle(200, 200, 200, 100) // Create a rectangle with dimensions 200x100
+                .fill('red'); // Fill the rectangle with a red color
+
+            app.stage.addChild(circle);
+            // Whenever you click one of these shape types, change the "state" of the app, depending on what state 
+
         }),
         ToolsManager.getTool("Rectangle",["fa-regular","fa-square"], () => {
             
+            const rect = new Graphics()
+                .rect(0, 0, 200, 100) // Create a rectangle with dimensions 200x100
+                .fill('red'); // Fill the rectangle with a red color
+
+            app.stage.addChild(rect);
             
         }),
         ToolsManager.getTool("Line",["fa-solid","fa-lines-leaning"], () => {
