@@ -6,6 +6,8 @@
 // They're all unique objects in the application that inherit from a base tool class
 /// OLD THOUGHTS ^^^^^^^^^
 
+import InputManager from "../managers/InputManager.js";
+
 
 // A TOOL is a base class that subscribes and unsubscribes to mouse events (on pointer down, move, and up).
 // It's the thing that talks with the input manager
@@ -22,12 +24,16 @@ export class Tool
     }
     activate()
     { 
-        InputManager.PointerDownEvent.addListener(this.containerPointerDown); /* ...move, up */ 
+        InputManager.PointerDownEvent.addListener(this.containerPointerDown);
+        InputManager.PointerMoveEvent.addListener(this.containerPointerMove);
+        InputManager.PointerUpEvent.addListener(this.containerPointerUp);
         this.isActive = true;
     }
     deactivate() 
     { 
-        InputManager.PointerDownEvent.removeListener(this.containerPointerDown); /* ... */ 
+        InputManager.PointerDownEvent.removeListener(this.containerPointerDown);
+        InputManager.PointerMoveEvent.removeListener(this.containerPointerMove);
+        InputManager.PointerUpEvent.removeListener(this.containerPointerUp);
         this.isActive = false;
     }
  

@@ -1,10 +1,11 @@
-import { Application, Assets, Sprite, Rectangle, Graphics, Ellipse  } from "pixi.js";
+import { Application, Container } from "pixi.js";
 import ToolsManager from "./managers/ToolsManager.js";
 import InputManager from "./managers/InputManager.js";
 
 import "../style.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import { Line, Star } from "./shapes/Shape.js";
+import { Rectangle, Circle, Line, Star } from "./shapes/Shape.js";
+import { ShapeTool } from "./tools/Tool.js";
 
 // Used for initializing the app and setting up the tools on the left hand side
 (async () => {
@@ -40,7 +41,7 @@ import { Line, Star } from "./shapes/Shape.js";
 
     ToolsManager.addToolGroup("Shapes",["fa-solid","fa-shapes"], [
         ToolsManager.getTool("Ellipse",["fa-regular","fa-circle"], () => {
-            selectShape(Ellipse)
+            selectShape(Circle)
         }),
         ToolsManager.getTool("Rectangle",["fa-regular","fa-square"], () => {
             selectShape(Rectangle)

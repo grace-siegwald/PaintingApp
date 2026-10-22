@@ -29,7 +29,7 @@ export class Shape {
     }  
     get height() // so dragging up still works
     {
-        return Math.abs(this.start.y, this.end.y)
+        return Math.abs(this.end.y - this.start.y);
     }
 
     // this 
@@ -40,7 +40,17 @@ export class Shape {
     }
     draw(graphics)  
     { 
-        throw new Error(`${this.constructor.name} must implement draw(graphics)`); 
+        throw new Error(`${this.constructor.name} must implement draw(graphics)`);
+    }
+
+    // Shared by every subclass: fill and outline whatever path draw() just described
+    applyStyle(graphics)
+    {
+        graphics.fill(this.style.fill);
+        if (this.style.strokeWidth > 0)
+        {
+            graphics.stroke({ width: this.style.strokeWidth, color: this.style.stroke });
+        }
     }
 }
 
@@ -51,7 +61,7 @@ export class Rectangle extends Shape
 {
     draw(graphics) 
     { 
-        graphics.rectangle(this.x, this.y, this.width, this.height); 
+        graphics.rect(this.x, this.y, this.width, this.height);
         this.applyStyle(graphics); 
     }
 }
@@ -61,8 +71,11 @@ export class Circle extends Shape
 {
     draw(graphics) 
     { 
-        graphics.circle(this.x, this.y, this.width, this.height)
-        this.applyStyle(graphics); 
+        // Pixi's ellipse wants the CENTER and two radii, not the top-left corner and size
+        const radiusX = this.width / 2;
+        const radiusY = this.height / 2;
+        graphics.ellipse(this.x + radiusX, this.y + radiusY, radiusX, radiusY);
+        this.applyStyle(graphics);
     }
 }
 
@@ -71,8 +84,10 @@ export class Star extends Shape
 {
     draw(graphics) 
     { 
-        graphics.star(this.x, this.y, this.width, this.height); 
-        this.applyStyle(graphics); 
+        // Pixi's star(centerX, centerY, numberOfPoints, radius) also works from the center
+        const radius = Math.min(this.width, this.height) / 2;
+        graphics.star(this.x + this.width / 2, this.y + this.height / 2, 5, radius);
+        this.applyStyle(graphics);
     }
 }
 

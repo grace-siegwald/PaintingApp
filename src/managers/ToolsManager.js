@@ -7,6 +7,22 @@ class ToolsManager {
         this.ToolPanel = document.getElementById("tool-panel");
         this.app = null;
         this.initialized = false;   
+        this.activeTool = null;
+    }
+
+    // Only one tool listens to the canvas at a time.
+    setActiveTool(tool) {
+        if (this.activeTool === tool) return;
+
+        if (this.activeTool) {
+            this.activeTool.deactivate();
+        }
+
+        this.activeTool = tool;
+
+        if (tool) {
+            tool.activate();
+        }
     }
 
     getTool(title = "",cssClasses = [],onClick = () => {}){

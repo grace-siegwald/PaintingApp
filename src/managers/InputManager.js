@@ -1,4 +1,3 @@
-import { Rectangle } from "pixi.js";
 import { Event } from "../Event.js";
 
 class InputManager {
@@ -29,12 +28,9 @@ class InputManager {
     setupEvents() {
         this.app.stage.eventMode = "static";
 
-        this.app.stage.hitArea = new Rectangle(
-            0,
-            0,
-            this.app.screen.width,
-            this.app.screen.height
-        );
+        // app.screen updates itself when the window resizes,
+        // so the whole canvas stays clickable after a resize.
+        this.app.stage.hitArea = this.app.screen;
         
         this.app.stage.on("pointerdown", (event) => {
             this.onPointerDown(event);
@@ -46,6 +42,12 @@ class InputManager {
         });
 
         this.app.stage.on("pointerup", (event) => {
+            this.onPointerUp(event);
+            this.#mouseDown = false;
+        });
+
+        // Releasing the mouse outside the canvas should still end a drag.
+        this.app.stage.on("pointerupoutside", (event) => {
             this.onPointerUp(event);
             this.#mouseDown = false;
         });
