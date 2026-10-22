@@ -1,54 +1,55 @@
-import { Application, Assets, Sprite, Rectangle, Graphics  } from "pixi.js";
+import { Application, Assets, Sprite, Rectangle, Graphics, Ellipse  } from "pixi.js";
 import ToolsManager from "./managers/ToolsManager.js";
 import InputManager from "./managers/InputManager.js";
 
 import "../style.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
+import { Line, Star } from "./shapes/Shape.js";
 
 // Used for initializing the app and setting up the tools on the left hand side
 (async () => {
     // Create a new application
     const app = new Application();
-
     // Initialize the application
     const container = document.getElementById("pixi-container");
-    
     await app.init({
         background: "#aaaaaa",
         resizeTo: container
     });
-
     console.log(container);
-
     InputManager.initialize(app)
+
+
+    // --- Grace's new stuff ---
+    const drawingLayer = new Container();
+    app.stage.addChild(drawingLayer);
+
+    // Adding a shape tool
+    const shapeTool = new ShapeTool(drawingLayer, () => ({
+    fill: fillColorPicker.value,
+    stroke: strokeColorPicker.value,
+    strokeWidth: Number(strokeInput.value),
+    }));
+
+    // Utility method for selecting the shape we want
+    const selectShape = (ShapeClass) => {
+    shapeTool.setShapeType(ShapeClass);
+    ToolsManager.setActiveTool(shapeTool);
+    };
+
 
     ToolsManager.addToolGroup("Shapes",["fa-solid","fa-shapes"], [
         ToolsManager.getTool("Ellipse",["fa-regular","fa-circle"], () => {
-            // Where we put code for "what happenes when this tool gets clicked"
-            const circle = new Graphics()
-                .circle(200, 200, 200, 100) // Create a rectangle with dimensions 200x100
-                .fill('red'); // Fill the rectangle with a red color
-
-            app.stage.addChild(circle);
-            // Whenever you click one of these shape types, change the "state" of the app, depending on what state 
-
+            selectShape(Ellipse)
         }),
         ToolsManager.getTool("Rectangle",["fa-regular","fa-square"], () => {
-            
-            const rect = new Graphics()
-                .rect(0, 0, 200, 100) // Create a rectangle with dimensions 200x100
-                .fill('red'); // Fill the rectangle with a red color
-
-            app.stage.addChild(rect);
-            
+            selectShape(Rectangle)
         }),
         ToolsManager.getTool("Line",["fa-solid","fa-lines-leaning"], () => {
-            
-            
+            selectShape(Line)
         }),
         ToolsManager.getTool("Star",["fa-regular","fa-star"], () => {
-            
-            
+            selectShape(Star)
         })
     ]);
     

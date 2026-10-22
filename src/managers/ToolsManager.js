@@ -1,4 +1,6 @@
 
+// A button should say "hey make this the active tool", and then the tool should do the drawing (or whatever thing it does)
+
 class ToolsManager {
 
     constructor() {

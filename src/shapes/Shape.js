@@ -1,0 +1,88 @@
+import { Graphics } from "pixi.js";
+
+export class Shape {
+    constructor(start, style) 
+    {
+        this.start = { x: start.x, y: start.y };
+        this.end   = { x: start.x, y: start.y };
+        this.style = style; // { fill, stroke, strokeWidth }
+        this.graphics = new Graphics(); // the Pixi object on screen
+    }
+    setEnd(point) 
+    { 
+        this.end = { ...point }; 
+        this.redraw(); 
+    }
+
+    // These are just like C# properties, each time the value is "gotten" its re-evaluated
+    get x() 
+    { 
+        return Math.min(this.start.x, this.end.x); 
+    }   
+    get y()
+    {
+        return Math.min(this.start.y, this.end.y)
+    }
+    get width()  // so dragging left still works
+    { 
+        return Math.abs(this.end.x - this.start.x); 
+    }  
+    get height() // so dragging up still works
+    {
+        return Math.abs(this.start.y, this.end.y)
+    }
+
+    // this 
+    redraw() 
+    { 
+        this.graphics.clear(); 
+        this.draw(this.graphics); 
+    }
+    draw(graphics)  
+    { 
+        throw new Error(`${this.constructor.name} must implement draw(graphics)`); 
+    }
+}
+
+
+// The shape subclasses: "how do I draw myself in this box?"
+// --- Rectangle ---
+export class Rectangle extends Shape 
+{
+    draw(graphics) 
+    { 
+        graphics.rectangle(this.x, this.y, this.width, this.height); 
+        this.applyStyle(graphics); 
+    }
+}
+
+// --- Circle ---
+export class Circle extends Shape 
+{
+    draw(graphics) 
+    { 
+        graphics.circle(this.x, this.y, this.width, this.height)
+        this.applyStyle(graphics); 
+    }
+}
+
+// --- Star ---
+export class Star extends Shape 
+{
+    draw(graphics) 
+    { 
+        graphics.star(this.x, this.y, this.width, this.height); 
+        this.applyStyle(graphics); 
+    }
+}
+
+// --- Line ---
+export class Line extends Shape // ignores the box and uses the two endpoints
+{   
+    draw(graphics) 
+    {
+        graphics.moveTo(this.start.x, this.start.y)
+        .lineTo(this.end.x, this.end.y)
+        .stroke({ width: Math.max(1, this.style.strokeWidth), color: this.style.stroke });
+    }
+}
