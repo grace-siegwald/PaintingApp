@@ -89,6 +89,8 @@ export class Star extends Shape
         graphics.star(this.x + this.width / 2, this.y + this.height / 2, 5, radius);
         this.applyStyle(graphics);
     }
+
+    // Need an undo and redo behavior, what they do when they redo undo
 }
 
 // --- Line ---

@@ -91,7 +91,7 @@ import { ShapeTool } from "./tools/Tool.js";
     let redoBtn = document.getElementById("redo");
         
     undoBtn.addEventListener("click",() => {
-
+        // code that will call undo in the new HistoryManager
     });
     
     redoBtn.addEventListener("click",() => {

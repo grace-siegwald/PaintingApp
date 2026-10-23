@@ -60,15 +60,17 @@ export class ShapeTool extends Tool {
     onPointerDown(point) 
     {
         if (this.state !== ShapeTool.State.IDLE || !this.ShapeClass) return;
-        this.currentShape = new this.ShapeClass(point, this.getStyle());
-        this.layer.addChild(this.currentShape.graphics);
-        this.state = ShapeTool.State.DRAGGING;
+        this.currentShape = new this.ShapeClass(point, this.getStyle()); // gets the current shape and style of that shape
+        this.layer.addChild(this.currentShape.graphics); 
+        this.state = ShapeTool.State.DRAGGING; // sets the tools state to the correct state
     }
 
     onPointerMove(point) 
     {
         if (this.state !== ShapeTool.State.DRAGGING) return;
-        this.currentShape.setEnd(point);           // redraws, which gives the live preview
+        
+        // every tick the pointer is moving, the shape is "redrawing" at that end point
+        this.currentShape.setEnd(point); // redraws, which gives the live preview
     }
 
     onPointerUp(point) 
