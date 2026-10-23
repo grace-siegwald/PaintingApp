@@ -25,7 +25,7 @@ import { ShapeTool } from "./tools/Tool.js";
     const drawingLayer = new Container();
     app.stage.addChild(drawingLayer);
 
-    // Adding a shape tool
+    // Adding a shape tool, it takes in the currecnt fill and stroke colors and width
     const shapeTool = new ShapeTool(drawingLayer, () => ({
     fill: fillColorPicker.value,
     stroke: strokeColorPicker.value,

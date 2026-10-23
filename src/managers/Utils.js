@@ -22,8 +22,8 @@ class Utils {
 
 	}
     
-    checkAABB(rect1, rect2) {
-        
+    checkAABB(rect1, rect2) { // all this is doing is deciding what's overlapped
+         
         let rect1HalfWidth = rect1.width/2;
         let rect1HalfHeight = rect1.height/2;
         let rect2HalfWidth = rect2.width/2;
