@@ -14,7 +14,7 @@ Structure:
     Shape.js (base): has start/end points, a Pixi Graphics, a draw() function
     BasicShapes.js extends Shape: Rectangle, Ellipse, Line, Star
 
-
+-----------
 Notes for 10/22:
 Create instances of all the actions we can do in the application, and all those instances should have a undo redo function defined
     Need a history manager to hold our stack
@@ -49,3 +49,35 @@ every action can undo and redo
 keyboard shortcuts???
 
 fill tool as a possible custom tool???
+-----------
+
+Notes for 10/29
+Deleting an object:
+    you are deleting the shape and unselecting 
+    You need to be able to throw on to the history mamanger a "set" of actions 
+
+Select Tool
+    Wraper class that you can pass any type of object into
+    It's going to create the selected outline and add it onto the selected layer
+    whenever you move the selected shape, you also end up moving the selected outline
+    
+    Group everything that is highlighted and moved into the actions
+        There is a select action and a de-select action
+    
+    To move the things that are selected    
+        Give me the list of selected...
+        Move the whole group of selected objects
+
+    Perhaps thinking of making a selection manager
+
+
+Wraper Class
+    Just an extended functionality that is added onto some entity or object
+    Can use it to hide or extend
+    For example:
+        You have a shape class
+        You take the created shape, and you pass in the shape to the wraper class
+        the wraper class is going to override the shape's api
+
+Deleting, Moving, Scaling, and MAYBE rotation (very doable)
+    Cameron's scale rate was .01, always multiplied by that
