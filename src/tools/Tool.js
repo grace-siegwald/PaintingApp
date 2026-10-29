@@ -7,6 +7,9 @@
 /// OLD THOUGHTS ^^^^^^^^^
 
 import InputManager from "../managers/InputManager.js";
+import HistoryManager from "../managers/HistoryManager.js";
+import SelectionManager from "../managers/SelectionManager.js";
+import { DrawShapeAction } from "../actions/DrawShapeAction.js";
 
 
 // A TOOL is a base class that subscribes and unsubscribes to mouse events (on pointer down, move, and up).
@@ -80,7 +83,47 @@ export class ShapeTool extends Tool {
         if (this.currentShape.width < 3 && this.currentShape.height < 3) {   // plain click
             this.currentShape.setEnd({ x: point.x + 100, y: point.y + 100 });
         }
+
+        // The drag was only a preview. Take the preview off the canvas and let an
+        // Action put the finished shape on, so it goes through the history (and can be undone)
+        this.layer.removeChild(this.currentShape.graphics);
+        HistoryManager.execute(new DrawShapeAction(this.currentShape, this.layer));
+
         this.currentShape = null;
         this.state = ShapeTool.State.IDLE;
+    }
+}
+
+// Select tool: click a shape to select it, click empty canvas to deselect.
+// Selecting isn't an Action (it doesn't go in the history). Photoshop, Figma, etc.
+// don't undo selections either, only changes to the drawing itself
+export class SelectTool extends Tool
+{
+    constructor(layer)
+    {
+        super("Select Tool");
+        this.layer = layer; // the Container holding all the drawn shapes
+    }
+
+    onPointerDown(point)
+    {
+        SelectionManager.select(this.findShapeAt(point)); // null = clicked empty space = deselect
+    }
+
+    // Returns the TOPMOST shape under the point, or null
+    findShapeAt(point)
+    {
+        const children = this.layer.children;
+
+        // Walk backwards: the last child is drawn on top, so it should win
+        for (let i = children.length - 1; i >= 0; i--)
+        {
+            const shape = children[i].shape; // the back-pointer set in Shape's constructor
+            if (shape && shape.containsPoint(point))
+            {
+                return shape;
+            }
+        }
+        return null;
     }
 }
