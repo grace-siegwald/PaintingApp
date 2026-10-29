@@ -144,8 +144,3 @@ body {
 #pixi-container canvas {
     display: block;
 }
-
-.header-action-placeholder:disabled {
-    opacity: 0.35;
-    cursor: default;
-}

@@ -1,13 +1,11 @@
 import { Application, Container } from "pixi.js";
 import ToolsManager from "./managers/ToolsManager.js";
 import InputManager from "./managers/InputManager.js";
-import HistoryManager from "./managers/HistoryManager.js";
-import SelectionManager from "./managers/SelectionManager.js";
 
 import "../style.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { Rectangle, Circle, Line, Star } from "./shapes/Shape.js";
-import { ShapeTool, SelectTool } from "./tools/Tool.js";
+import { ShapeTool } from "./tools/Tool.js";
 
 // Used for initializing the app and setting up the tools on the left hand side
 (async () => {
@@ -26,13 +24,6 @@ import { ShapeTool, SelectTool } from "./tools/Tool.js";
     // --- Grace's new stuff ---
     const drawingLayer = new Container();
     app.stage.addChild(drawingLayer);
-
-    // Added AFTER drawingLayer, so it's drawn on top: the selection box sits above every shape
-    const selectionLayer = new Container();
-    app.stage.addChild(selectionLayer);
-    SelectionManager.initialize(selectionLayer);
-
-    const selectTool = new SelectTool(drawingLayer);
 
     // Adding a shape tool, it takes in the currecnt fill and stroke colors and width
     const shapeTool = new ShapeTool(drawingLayer, () => ({
@@ -71,7 +62,7 @@ import { ShapeTool, SelectTool } from "./tools/Tool.js";
     ToolsManager.addTool(strokeColorPicker);
     
     ToolsManager.addTool(ToolsManager.getTool("Select Tool",["fa-solid","fa-arrow-pointer"], () => {
-        ToolsManager.setActiveTool(selectTool);
+        
     }));
     
     ToolsManager.addTool(ToolsManager.getTool("Move Tool",["fa-solid","fa-up-down-left-right"], () => {
@@ -100,20 +91,12 @@ import { ShapeTool, SelectTool } from "./tools/Tool.js";
     let redoBtn = document.getElementById("redo");
         
     undoBtn.addEventListener("click",() => {
-        HistoryManager.undo();
+        // code that will call undo in the new HistoryManager
     });
-
+    
     redoBtn.addEventListener("click",() => {
-        HistoryManager.redo();
-    });
 
-    // Grey out undo/redo when there's nothing to undo/redo
-    const updateUndoRedoButtons = () => {
-        undoBtn.disabled = !HistoryManager.canUndo();
-        redoBtn.disabled = !HistoryManager.canRedo();
-    };
-    HistoryManager.HistoryChangedEvent.addListener(updateUndoRedoButtons);
-    updateUndoRedoButtons(); // set the starting state (both disabled)
+    });
     
     
 
