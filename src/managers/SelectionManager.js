@@ -10,6 +10,7 @@ class SelectionManager
     {
         this.selected = null;   // the selected Shape, or null
         this.highlight = null;  // Pixi Graphics used to draw the selection box
+        this.drawingLayer = null; // the Container holding all the drawn shapes
 
         // If the selected shape gets undone (removed from the canvas), deselect it.
         // Otherwise just redraw the box, in case the shape changed
@@ -27,10 +28,11 @@ class SelectionManager
     }
 
     // overlayLayer: a Container drawn ON TOP of the drawing layer
-    initialize(overlayLayer)
+    initialize(overlayLayer, drawingLayer)
     {
         this.highlight = new Graphics();
         overlayLayer.addChild(this.highlight);
+        this.drawingLayer = drawingLayer;
     }
 
     select(shape)
@@ -58,6 +60,21 @@ class SelectionManager
             .rect(shape.x - padding, shape.y - padding,
                   shape.width + padding * 2, shape.height + padding * 2)
             .stroke({ width: 2, color: 0x2f80ed });
+    }
+
+    // Returns the TOPMOST shape under the point, or null.
+    findShapeAt(point)
+    {
+        const children = this.drawingLayer.children;
+        for (let i = children.length - 1; i >= 0; i--)
+        {
+            const shape = children[i].shape;
+            if (shape && shape.containsPoint(point))
+            {
+                return shape;
+            }
+        }
+        return null;
     }
 }
 

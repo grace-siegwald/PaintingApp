@@ -17,20 +17,4 @@ export class SelectTool extends Tool
         SelectionManager.select(this.findShapeAt(point)); // null = clicked empty space = deselect
     }
 
-    // Returns the TOPMOST shape under the point, or null
-    findShapeAt(point)
-    {
-        const children = this.layer.children;
-
-        // Walk backwards: the last child is drawn on top, so it should win
-        for (let i = children.length - 1; i >= 0; i--)
-        {
-            const shape = children[i].shape; // the back-pointer set in Shape's constructor
-            if (shape && shape.containsPoint(point))
-            {
-                return shape;
-            }
-        }
-        return null;
-    }
 }
