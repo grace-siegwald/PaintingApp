@@ -150,49 +150,70 @@ export class Circle extends Shape
     }
 }
 
-// --- Star ---
-// The 10 corners of a star (5 points + 5 inner corners) on a circle of radius 1
-// around (0, 0), starting at the top point. Worked out once, when the file loads.
-const STAR_INNER = 0.5; // inner corners are half as far out as the points
-const UNIT_STAR = [];
-for (let i = 0; i < 10; i++)
+// --- Polygon shapes ---
+// A shape made of straight edges between a list of corner points, stretched to fill its box.
+// Subclasses only say WHERE their corners are (the "unitPoints"). The points can be any size and anywhere: getCorners() measures the box around them and stretches that box to line up exactly 
+// with the shape's box. Star, Triangle, Hexagon, Heart... all use this
+export class PolygonShape extends Shape
 {
-    const angle = -Math.PI / 2 + i * Math.PI / 5;   // start pointing straight up, 36 degrees apart
-    const radius = (i % 2 === 0) ? 1 : STAR_INNER;  // even = point, odd = inner corner
-    UNIT_STAR.push({ x: Math.cos(angle) * radius, y: Math.sin(angle) * radius });
-}
-// The box around that star. It's NOT -1 to 1 on every side: the bottom points don't
-// reach as far down as the top point reaches up, and the side points don't reach x = 1
-const STAR_LEFT   = Math.min(...UNIT_STAR.map(p => p.x));
-const STAR_RIGHT  = Math.max(...UNIT_STAR.map(p => p.x));
-const STAR_TOP    = Math.min(...UNIT_STAR.map(p => p.y));
-const STAR_BOTTOM = Math.max(...UNIT_STAR.map(p => p.y));
+    // "Abstract": every subclass returns its own list of {x, y} points
+    get unitPoints()
+    {
+        throw new Error(`${this.constructor.name} must provide unitPoints`);
+    }
 
-export class Star extends Shape 
-{
-    // Stretch the unit star so its own box lines up exactly with this shape's box:
-    // the top point touches the top edge, the side points touch the sides, and the
-    // two bottom points touch the bottom. (0 = left/top edge, 1 = right/bottom edge)
+    // Stretch the points so their box lines up exactly with this shape's box
+    // (0 = left/top edge, 1 = right/bottom edge)
     getCorners()
     {
-        return UNIT_STAR.map(p => ({
-            x: this.x + (p.x - STAR_LEFT) / (STAR_RIGHT - STAR_LEFT) * this.width,
-            y: this.y + (p.y - STAR_TOP) / (STAR_BOTTOM - STAR_TOP) * this.height,
+        const points = this.unitPoints;
+        const left   = Math.min(...points.map(p => p.x));
+        const right  = Math.max(...points.map(p => p.x));
+        const top    = Math.min(...points.map(p => p.y));
+        const bottom = Math.max(...points.map(p => p.y));
+
+        return points.map(p => ({
+            x: this.x + (p.x - left) / (right - left) * this.width,
+            y: this.y + (p.y - top) / (bottom - top) * this.height,
         }));
     }
 
-    draw(graphics) 
-    { 
-        graphics.poly(this.getCorners()); // a closed shape through all 10 corners
+    draw(graphics)
+    {
+        graphics.poly(this.getCorners()); // a closed shape through all the corners
         this.applyStyle(graphics);
     }
 
-    // Clicking between the points shouldn't select the star.
+    // Clicking in the empty parts of the box shouldn't select the shape.
     // Pixi's Polygon already knows how to answer "is this point inside me?"
     containsPoint(point)
     {
         return new Polygon(this.getCorners()).contains(point.x, point.y);
     }
+}
+
+// Corner points evenly spaced around a circle of radius 1, starting at startAngle
+// (in degrees: 0 = pointing right, -90 = pointing up). Handy for any regular shape
+export function regularPolygonPoints(sides, startAngle = -90)
+{
+    const points = [];
+    for (let i = 0; i < sides; i++)
+    {
+        const angle = (startAngle + i * 360 / sides) * Math.PI / 180; // degrees -> radians
+        points.push({ x: Math.cos(angle), y: Math.sin(angle) });
+    }
+    return points;
+}
+
+// --- Star ---
+// 10 corners: 5 points, and 5 inner corners in between that are half as far out
+const STAR_INNER = 0.5;
+const STAR_POINTS = regularPolygonPoints(10).map((p, i) =>
+    (i % 2 === 0) ? p : { x: p.x * STAR_INNER, y: p.y * STAR_INNER });
+
+export class Star extends PolygonShape
+{
+    get unitPoints() { return STAR_POINTS; }
 }
 
 // --- Line ---

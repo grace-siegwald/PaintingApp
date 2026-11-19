@@ -16,6 +16,7 @@ import { GroupAction } from "./actions/GroupAction.js";
 import { UngroupAction } from "./actions/UngroupAction.js";
 import { CompositeAction } from "./actions/CompositeAction.js";
 import { Group } from "./shapes/Group.js";
+import { Triangle, Diamond, Hexagon, Arrow, Heart } from "./shapes/CustomShapes.js";
 
 
 // Used for initializing the app and setting up the tools on the left hand side
@@ -72,6 +73,21 @@ import { Group } from "./shapes/Group.js";
         }),
         ToolsManager.getTool("Star",["fa-regular","fa-star"], () => {
             selectShape(Star)
+        }),
+        ToolsManager.getTool("Triangle",["fa-solid","fa-play","fa-rotate-270"], () => {
+            selectShape(Triangle)  // "play" icon turned to point up
+        }),
+        ToolsManager.getTool("Diamond",["fa-solid","fa-diamond"], () => {
+            selectShape(Diamond)
+        }),
+        ToolsManager.getTool("Hexagon",["fa-solid","fa-hexagon"], () => {
+            selectShape(Hexagon)
+        }),
+        ToolsManager.getTool("Arrow",["fa-solid","fa-arrow-right"], () => {
+            selectShape(Arrow)
+        }),
+        ToolsManager.getTool("Heart",["fa-regular","fa-heart"], () => {
+            selectShape(Heart)
         })
     ]);
     
@@ -136,7 +152,7 @@ import { Group } from "./shapes/Group.js";
 
         HistoryManager.execute(new DeleteShapeAction([...shapes], drawingLayer));
     };
-    
+
     // The Delete or Backspace key does the same thing || Ctrl+G and Ctrl+Shift+G for grouping and ungrouping || Ctrl+Z and Ctrl+Shift+Z for undo and redo
     document.addEventListener("keydown", (e) => {
         // ...unless you're typing in a box (like Stroke), where Backspace erases a character

@@ -47,6 +47,7 @@ export class ShapeTool extends Tool {
     {
         if (this.state !== ShapeTool.State.DRAGGING) return;
         this.currentShape.setEnd(point);
+        SelectionManager.hideMarquee(); // hides the dashed drag box
         
         // Plain click (no real drag): make a default-size shape CENTERED on the click, by putting the two corners half the size away from it in each direction
         if (this.currentShape.width < 3 && this.currentShape.height < 3)
