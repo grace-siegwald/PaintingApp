@@ -2,22 +2,28 @@ import { Action } from "./Action.js";
 
 export class DeleteShapeAction extends Action
 {
-    constructor(shape, layer)
+    constructor(shapes, layer)
     {
-        super("Delete " + shape.constructor.name);
-        this.shape = shape;
+        super("Delete");
+        this.shapes = shapes;
         this.layer = layer;
-        this.index = -1; // where it sat in the layer (0 = bottom), saved in execute()
+        this.indexes = [];
     }
 
     execute()
     {
-        this.index = this.layer.getChildIndex(this.shape.graphics);
-        this.layer.removeChild(this.shape.graphics);
+        // Write down EVERY spot before removing ANY: removing one shifts everything above it
+        this.indexes = this.shapes.map(shape => this.layer.getChildIndex(shape.graphics));
+        for (const shape of this.shapes) this.layer.removeChild(shape.graphics);
     }
 
     undo()
     {
-        this.layer.addChildAt(this.shape.graphics, this.index);
+        // Put them back bottom-up, so each lands in exactly its old spot
+        const bottomFirst = this.shapes
+            .map((shape, i) => ({ shape: shape, index: this.indexes[i] }))
+            .sort((a, b) => a.index - b.index); // like OrderBy(x => x.index)
+
+        for (const item of bottomFirst) this.layer.addChildAt(item.shape.graphics, item.index);
     }
 }

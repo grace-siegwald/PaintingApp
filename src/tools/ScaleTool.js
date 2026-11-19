@@ -1,19 +1,16 @@
-import { Tool } from "./Tool.js";
 import HistoryManager from "../managers/HistoryManager.js";
 import SelectionManager from "../managers/SelectionManager.js";
 import { ScaleAction } from "../actions/ScaleAction.js";
+import { SelectingTool } from "./SelectingTool.js";
 
 const SCALE_RATE = 0.01; // each pixel dragged = 1% bigger/smaller
 const MIN_SCALE = 0.1; // never shrink below 10%
 
-export class ScaleTool extends Tool
+export class ScaleTool extends SelectingTool
 {
-    static State = Object.freeze({ IDLE: "idle", DRAGGING: "dragging" });
-
     constructor()
     {
         super("Scale Tool");
-        this.state = ScaleTool.State.IDLE;
         this.shapes = [];
         this.before = [];
         this.center = null;
@@ -21,25 +18,20 @@ export class ScaleTool extends Tool
         this.factor = 1;
     }
 
-    onPointerDown(point)
+    onDragStart(point, shapes)
     {
-        if (this.state !== ScaleTool.State.IDLE) return;
+        this.shapes = shapes;
+        this.before = this.shapes.map(s => s.getPoints());
 
-        const shape = SelectionManager.selectAt(point);
-        if (!shape) return;
+        const bounds = SelectionManager.getBounds(shapes);
+        this.center = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
 
-        this.shapes = [shape];
-        this.before = this.shapes.map(s => s.getPoints()); 
-        this.center = shape.center;
         this.startPoint = point;
         this.factor = 1;
-        this.state = ScaleTool.State.DRAGGING;
     }
 
-    onPointerMove(point)
+    onDrag(point)
     {
-        if (this.state !== ScaleTool.State.DRAGGING) return;
-
         const dx = point.x - this.startPoint.x; // since the START of the drag
         this.factor = Math.max(MIN_SCALE, 1 + dx * SCALE_RATE);
 
@@ -51,10 +43,9 @@ export class ScaleTool extends Tool
         SelectionManager.refresh();
     }
 
-    onPointerUp(point)
+    onDragEnd(point)
     {
-        if (this.state !== ScaleTool.State.DRAGGING) return;
-        this.onPointerMove(point);
+        this.onDrag(point)
 
         if (this.factor !== 1)
         {
@@ -67,6 +58,5 @@ export class ScaleTool extends Tool
 
         this.shapes = [];
         this.before = [];
-        this.state = ScaleTool.State.IDLE;
     }
 }

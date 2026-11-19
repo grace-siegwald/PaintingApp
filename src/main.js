@@ -127,10 +127,10 @@ import { DeleteShapeAction } from "./actions/DeleteShapeAction.js";
     // ---- DELETE LOGIC ----
     // Deletes whatever's selected. Not a tool you switch to: it acts right away
     const deleteSelected = () => {
-        const shape = SelectionManager.selected;
-        if (!shape) return; // nothing selected, nothing to delete
+        const shapes = SelectionManager.selected;
+        if (shapes.length === 0) return; // was: if (!shape)
 
-        HistoryManager.execute(new DeleteShapeAction(shape, drawingLayer));
+        HistoryManager.execute(new DeleteShapeAction([...shapes], drawingLayer));
     };
     // The Delete or Backspace key does the same thing
     document.addEventListener("keydown", (e) => {

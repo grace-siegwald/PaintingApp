@@ -9,7 +9,7 @@ class ToolsManager {
         this.initialized = false;   
         this.activeTool = null;
     }
-
+    
     // Only one tool listens to the canvas at a time.
     setActiveTool(tool) {
         if (this.activeTool === tool) return;

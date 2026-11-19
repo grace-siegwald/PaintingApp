@@ -1,68 +1,51 @@
 import { Graphics } from "pixi.js";
 import HistoryManager from "./HistoryManager.js";
 
-// Remembers which shape is selected and draws the blue box around it.
-// It's a manager (not part of SelectTool) because other tools will need to know
-// what's selected too: Delete, Move and Scale all act on "the selected shape"
 class SelectionManager
 {
     constructor()
     {
-        this.selected = null;   // the selected Shape, or null
-        this.highlight = null;  // Pixi Graphics used to draw the selection box
-        this.drawingLayer = null; // the Container holding all the drawn shapes
+        this.selected = []; // every selected Shape (empty list = nothing selected)
+        this.highlight = null; // draws the blue selection boxes
+        this.marquee = null; // draws the drag-a-box rectangle
+        this.drawingLayer = null;
 
-        // If the selected shape gets undone (removed from the canvas), deselect it.
-        // Otherwise just redraw the box, in case the shape changed
+        // After any undo/redo/action: drop anything no longer on the canvas, redraw boxes
         HistoryManager.HistoryChangedEvent.addListener(() =>
         {
-            if (this.selected && !this.selected.graphics.parent)
-            {
-                this.clear();
-            }
-            else
-            {
-                this.refresh();
-            }
+            this.selected = this.selected.filter(shape => shape.graphics.parent === this.drawingLayer);
+            this.refresh();
         });
     }
 
-    // overlayLayer: a Container drawn ON TOP of the drawing layer
     initialize(overlayLayer, drawingLayer)
     {
         this.highlight = new Graphics();
+        this.marquee = new Graphics();
         overlayLayer.addChild(this.highlight);
+        overlayLayer.addChild(this.marquee);
         this.drawingLayer = drawingLayer;
     }
 
-    select(shape)
+    // ---- Changing the selection ----
+    setSelection(shapes)
     {
-        this.selected = shape;
+        this.selected = [...shapes]; // a copy, so nobody else's list gets changed by accident
         this.refresh();
     }
 
-    clear()
+    clear() { this.setSelection([]); }
+
+    isSelected(shape) { return this.selected.includes(shape); } // like List.Contains()
+
+    toggle(shape) // shift+click
     {
-        this.select(null);
+        if (this.isSelected(shape)) this.selected = this.selected.filter(s => s !== shape);
+        else this.selected.push(shape);
+        this.refresh();
     }
 
-    // Redraw the selection box around the selected shape (or nothing)
-    refresh()
-    {
-        if (!this.highlight) return;
-
-        this.highlight.clear();
-        if (!this.selected) return;
-
-        const shape = this.selected;
-        const padding = 4 + shape.style.strokeWidth / 2; // sit just outside the stroke
-        this.highlight
-            .rect(shape.x - padding, shape.y - padding,
-                  shape.width + padding * 2, shape.height + padding * 2)
-            .stroke({ width: 2, color: 0x2f80ed });
-    }
-
-    // Returns the TOPMOST shape under the point, or null.
+    // ---- Finding shapes ----
     findShapeAt(point)
     {
         const children = this.drawingLayer.children;
@@ -77,19 +60,61 @@ class SelectionManager
         return null;
     }
 
-    selectAt(point) // so that we can select at specific points, not just whole shapes
+    // A selected shape under the point, or null (so you can grab one even if it's covered)
+    selectedShapeAt(point)
     {
-        // 1. Pressed on the shape that's already selected? Keep it, even if another shape is on top of it at that spot, so you can still grab it.
-        // 2. Otherwise, select whatever's under the pointer (null = empty space = deselect)
-        if (this.selected && this.selected.containsPoint(point))
-        {
-            return this.selected;
-        }
-
-        const shape = this.findShapeAt(point);
-        this.select(shape);
-        return shape;
+        return this.selected.find(shape => shape.containsPoint(point)) ?? null;
     }
+
+    // Every shape whose bounding box touches the rectangle, bottom to top
+    findShapesInRect(rect)
+    {
+        return this.drawingLayer.children
+            .map(child => child.shape)
+            .filter(shape => shape && boxesOverlap(shape, rect));
+    }
+
+    // One box around ALL the given shapes
+    getBounds(shapes = this.selected)
+    {
+        const left   = Math.min(...shapes.map(s => s.x));
+        const top    = Math.min(...shapes.map(s => s.y));
+        const right  = Math.max(...shapes.map(s => s.x + s.width));
+        const bottom = Math.max(...shapes.map(s => s.y + s.height));
+        return { x: left, y: top, width: right - left, height: bottom - top };
+    }
+
+    // ---- Drawing ----
+    refresh()
+    {
+        if (!this.highlight) return;
+        this.highlight.clear();
+        for (const shape of this.selected)
+        {
+            const padding = 4 + shape.style.strokeWidth / 2;
+            this.highlight
+                .rect(shape.x - padding, shape.y - padding,
+                      shape.width + padding * 2, shape.height + padding * 2)
+                .stroke({ width: 2, color: 0x2f80ed });
+        }
+    }
+
+    showMarquee(rect)
+    {
+        this.marquee.clear()
+            .rect(rect.x, rect.y, rect.width, rect.height)
+            .fill({ color: 0x2f80ed, alpha: 0.1 })
+            .stroke({ width: 1, color: 0x2f80ed });
+    }
+
+    hideMarquee() { this.marquee.clear(); }
+}
+
+// Do two boxes touch? (x/y = TOP-LEFT corner, like our shapes)
+function boxesOverlap(a, b)
+{
+    return a.x <= b.x + b.width  && a.x + a.width  >= b.x &&
+           a.y <= b.y + b.height && a.y + a.height >= b.y;
 }
 
 export default new SelectionManager();

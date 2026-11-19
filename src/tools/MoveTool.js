@@ -1,40 +1,30 @@
-import { Tool } from "./Tool.js";
 import HistoryManager from "../managers/HistoryManager.js";
 import SelectionManager from "../managers/SelectionManager.js";
 import { MoveAction } from "../actions/MoveAction.js";
+import { SelectingTool } from "./SelectingTool.js";
 
-export class MoveTool extends Tool
+export class MoveTool extends SelectingTool
 {
-    static State = Object.freeze({ IDLE: "idle", DRAGGING: "dragging" });
-
     constructor()
     {
         super("Move Tool");
-        this.state = MoveTool.State.IDLE;
         this.shapes = [];
         this.lastPoint = null;
         this.totalDx = 0;
         this.totalDy = 0;
     }
 
-    onPointerDown(point)
+    onDragStart(point, shapes)
     {
-        if (this.state !== MoveTool.State.IDLE) return;
-
-        const shape = SelectionManager.selectAt(point);
-        if (!shape) return; // clicked empty space: nothing to drag
-
-        this.shapes = [shape];
+        this.shapes = shapes;
         this.lastPoint = point;
         this.totalDx = 0;
         this.totalDy = 0;
-        this.state = MoveTool.State.DRAGGING;
     }
 
-    onPointerMove(point)
-    {
-        if (this.state !== MoveTool.State.DRAGGING) return;
 
+    onDrag(point)
+    {
         const dx = point.x - this.lastPoint.x; // movement since the LAST event
         const dy = point.y - this.lastPoint.y;
 
@@ -46,10 +36,9 @@ export class MoveTool extends Tool
         this.lastPoint = point;
     }
 
-    onPointerUp(point)
+    onDragEnd(point)
     {
-        if (this.state !== MoveTool.State.DRAGGING) return;
-        this.onPointerMove(point); // catch the last bit of movement
+        this.onDrag(point)
 
         if (this.totalDx !== 0 || this.totalDy !== 0)
         {
@@ -60,6 +49,5 @@ export class MoveTool extends Tool
 
         this.shapes = [];
         this.lastPoint = null;
-        this.state = MoveTool.State.IDLE;
     }
 }

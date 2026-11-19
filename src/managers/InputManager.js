@@ -53,17 +53,22 @@ class InputManager {
         });
     }
 
+    // What every tool receives: where the pointer is, and whether Shift is held down, helper methoddddd
+    toPoint(event) {
+        return { x: event.global.x, y: event.global.y, shiftKey: event.shiftKey };
+    }
+
     onPointerDown(event) {
         console.log(event.global.x, event.global.y);
-        this.PointerDownEvent.invoke({x:event.global.x,y:event.global.y});
+        this.PointerDownEvent.invoke(this.toPoint(event));
     }
 
     onPointerMove(event) {
-        this.PointerMoveEvent.invoke({x:event.global.x,y:event.global.y});
+        this.PointerMoveEvent.invoke(this.toPoint(event));
     }
 
     onPointerUp(event) {
-        this.PointerUpEvent.invoke({x:event.global.x,y:event.global.y});
+        this.PointerUpEvent.invoke(this.toPoint(event));
     }
     
     getIsMouseDown() {
