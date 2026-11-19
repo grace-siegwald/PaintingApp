@@ -56,6 +56,36 @@ export class Shape {
         this.redraw();
     }
 
+    // The middle of the bounding box: the point a shape grows/shrinks around
+    get center()
+    {
+        return { x: this.x + this.width / 2, y: this.y + this.height / 2 };
+    }
+
+    // A copy of the two points that define this shape (a "snapshot")
+    getPoints()
+    {
+        return { start: { ...this.start }, end: { ...this.end } };
+    }
+
+    // Put the shape back to a snapshot from getPoints()
+    setPoints(points)
+    {
+        this.start = { ...points.start };
+        this.end = { ...points.end };
+        this.redraw();
+    }
+
+    // Each point's distance from the center gets multiplied by the factor
+    scaleBy(factor, center)
+    {
+        this.start.x = center.x + (this.start.x - center.x) * factor;
+        this.start.y = center.y + (this.start.y - center.y) * factor;
+        this.end.x = center.x + (this.end.x - center.x) * factor;
+        this.end.y = center.y + (this.end.y - center.y) * factor;
+        this.redraw();
+}
+
     // "Is this point inside me?" Used by the select tool.
     // Default answer: is it inside my bounding box? Subclasses override this when
     // the box is a bad fit for their shape (a circle's corners, a thin line)

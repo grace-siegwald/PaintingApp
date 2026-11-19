@@ -10,6 +10,8 @@ import { Rectangle, Circle, Line, Star } from "./shapes/Shape.js";
 import { ShapeTool } from "./tools/ShapeTool.js";
 import { SelectTool } from "./tools/SelectTool.js";
 import { MoveTool } from "./tools/MoveTool.js";
+import { ScaleTool } from "./tools/ScaleTool.js";
+
 
 
 // Used for initializing the app and setting up the tools on the left hand side
@@ -38,6 +40,7 @@ import { MoveTool } from "./tools/MoveTool.js";
     // get the tools
     const selectTool = new SelectTool();
     const moveTool = new MoveTool();
+    const scaleTool = new ScaleTool();
 
     // Adding a shape tool, it takes in the currecnt fill and stroke colors and width
     const shapeTool = new ShapeTool(drawingLayer, () => ({
@@ -84,7 +87,7 @@ import { MoveTool } from "./tools/MoveTool.js";
     }));
     
     ToolsManager.addTool(ToolsManager.getTool("Scale Tool",["fa-solid","fa-up-right-and-down-left-from-center"], () => {
-        
+        ToolsManager.setActiveTool(scaleTool);
     }));
     
     ToolsManager.addTool(ToolsManager.getTool("Delete Tool",["fa-solid","fa-trash-can"], () => {        

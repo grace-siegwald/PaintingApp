@@ -76,6 +76,20 @@ class SelectionManager
         }
         return null;
     }
+
+    selectAt(point) // so that we can select at specific points, not just whole shapes
+    {
+        // 1. Pressed on the shape that's already selected? Keep it, even if another shape is on top of it at that spot, so you can still grab it.
+        // 2. Otherwise, select whatever's under the pointer (null = empty space = deselect)
+        if (this.selected && this.selected.containsPoint(point))
+        {
+            return this.selected;
+        }
+
+        const shape = this.findShapeAt(point);
+        this.select(shape);
+        return shape;
+    }
 }
 
 export default new SelectionManager();
