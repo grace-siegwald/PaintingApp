@@ -12,6 +12,10 @@ import { SelectTool } from "./tools/SelectTool.js";
 import { MoveTool } from "./tools/MoveTool.js";
 import { ScaleTool } from "./tools/ScaleTool.js";
 import { DeleteShapeAction } from "./actions/DeleteShapeAction.js";
+import { GroupAction } from "./actions/GroupAction.js";
+import { UngroupAction } from "./actions/UngroupAction.js";
+import { CompositeAction } from "./actions/CompositeAction.js";
+import { Group } from "./shapes/Group.js";
 
 
 // Used for initializing the app and setting up the tools on the left hand side
@@ -95,11 +99,11 @@ import { DeleteShapeAction } from "./actions/DeleteShapeAction.js";
     }));
     
     ToolsManager.addTool(ToolsManager.getTool("Group Tool",["fa-solid","fa-object-group"], () => {        
-       
+       groupSelected();
     }));
     
     ToolsManager.addTool(ToolsManager.getTool("Ungroup Tool",["fa-regular","fa-object-group"], () => {        
-        
+        ungroupSelected();
     }));
     
     container.appendChild(app.canvas);
@@ -132,7 +136,7 @@ import { DeleteShapeAction } from "./actions/DeleteShapeAction.js";
 
         HistoryManager.execute(new DeleteShapeAction([...shapes], drawingLayer));
     };
-    // The Delete or Backspace key does the same thing
+    // The Delete or Backspace key does the same thing + Ctrl+G and Ctrl+Shift+G for grouping and ungrouping
     document.addEventListener("keydown", (e) => {
         // ...unless you're typing in a box (like Stroke), where Backspace erases a character
         if (e.target.tagName === "INPUT") return;
@@ -142,7 +146,38 @@ import { DeleteShapeAction } from "./actions/DeleteShapeAction.js";
             e.preventDefault();
             deleteSelected();
         }
+
+        // Ctrl+G = group, Ctrl+Shift+G = ungroup (Cmd instead of Ctrl on a Mac)
+        // With Shift held, e.key is a capital "G", so compare in lowercase
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "g")
+        {
+            e.preventDefault(); // otherwise the browser does "find next"
+            if (e.shiftKey) ungroupSelected();
+            else groupSelected();
+        }
     });
+
+    // ---- GROUP LOGIC ----
+    // Groups everything selected into one Group (needs at least 2 things)
+    const groupSelected = () => {
+        const shapes = SelectionManager.selected;
+        if (shapes.length < 2) return;
+
+        const action = new GroupAction(shapes, drawingLayer);
+        HistoryManager.execute(action);
+        SelectionManager.setSelection([action.group]); // select the new group
+    };
+
+    // Ungroups every selected group. Several groups = several UngroupActions,
+    // wrapped in ONE CompositeAction so a single undo puts them all back
+    const ungroupSelected = () => {
+        const groups = SelectionManager.selected.filter(shape => shape instanceof Group); // like "is Group" C# wow wow wow
+        if (groups.length === 0) return;
+
+        const actions = groups.map(group => new UngroupAction(group, drawingLayer));
+        HistoryManager.execute(new CompositeAction("Ungroup", actions));
+        SelectionManager.setSelection(groups.flatMap(group => group.children)); // select the pieces
+    };
 
 
     // Load the bunny texture
