@@ -19,9 +19,18 @@ export class MoveTool extends Tool
 
     onPointerDown(point)
     {
-        const shape = SelectionManager.selected;
-        // Only start dragging if you pressed ON the selected shape
-        if (this.state !== MoveTool.State.IDLE || !shape || !shape.containsPoint(point)) return;
+        if (this.state !== MoveTool.State.IDLE) return;
+
+        // 1. Pressed on the shape that's already selected? Keep it, even if another shape is on top of it at that spot, so you can still grab it.
+        // 2. Otherwise, select whatever's under the pointer (null = empty space = deselect)
+        let shape = SelectionManager.selected;
+        if (!shape || !shape.containsPoint(point))
+        {
+            shape = SelectionManager.findShapeAt(point);
+            SelectionManager.select(shape);
+        }
+
+        if (!shape) return; // clicked empty space: nothing to drag
 
         this.shapes = [shape];
         this.lastPoint = point;

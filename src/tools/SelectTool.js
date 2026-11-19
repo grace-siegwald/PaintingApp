@@ -6,15 +6,13 @@ import SelectionManager from "../managers/SelectionManager.js";
 // don't undo selections either, only changes to the drawing itself
 export class SelectTool extends Tool
 {
-    constructor(layer)
+    constructor()
     {
         super("Select Tool");
-        this.layer = layer; // the Container holding all the drawn shapes
     }
 
     onPointerDown(point)
     {
-        SelectionManager.select(this.findShapeAt(point)); // null = clicked empty space = deselect
+        SelectionManager.select(SelectionManager.findShapeAt(point)); // null = deselect
     }
-
 }

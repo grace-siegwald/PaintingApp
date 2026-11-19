@@ -33,10 +33,10 @@ import { MoveTool } from "./tools/MoveTool.js";
     // Added AFTER drawingLayer, so it's drawn on top: the selection box sits above every shape
     const selectionLayer = new Container();
     app.stage.addChild(selectionLayer);
-    SelectionManager.initialize(selectionLayer);
+    SelectionManager.initialize(selectionLayer, drawingLayer);
 
     // get the tools
-    const selectTool = new SelectTool(drawingLayer);
+    const selectTool = new SelectTool();
     const moveTool = new MoveTool();
 
     // Adding a shape tool, it takes in the currecnt fill and stroke colors and width
