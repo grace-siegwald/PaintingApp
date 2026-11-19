@@ -11,7 +11,7 @@ import { ShapeTool } from "./tools/ShapeTool.js";
 import { SelectTool } from "./tools/SelectTool.js";
 import { MoveTool } from "./tools/MoveTool.js";
 import { ScaleTool } from "./tools/ScaleTool.js";
-
+import { DeleteShapeAction } from "./actions/DeleteShapeAction.js";
 
 
 // Used for initializing the app and setting up the tools on the left hand side
@@ -91,7 +91,7 @@ import { ScaleTool } from "./tools/ScaleTool.js";
     }));
     
     ToolsManager.addTool(ToolsManager.getTool("Delete Tool",["fa-solid","fa-trash-can"], () => {        
-        
+        deleteSelected();
     }));
     
     ToolsManager.addTool(ToolsManager.getTool("Group Tool",["fa-solid","fa-object-group"], () => {        
@@ -124,6 +124,26 @@ import { ScaleTool } from "./tools/ScaleTool.js";
     updateUndoRedoButtons(); // set the starting state (both disabled)
     
     
+    // ---- DELETE LOGIC ----
+    // Deletes whatever's selected. Not a tool you switch to: it acts right away
+    const deleteSelected = () => {
+        const shape = SelectionManager.selected;
+        if (!shape) return; // nothing selected, nothing to delete
+
+        HistoryManager.execute(new DeleteShapeAction(shape, drawingLayer));
+    };
+    // The Delete or Backspace key does the same thing
+    document.addEventListener("keydown", (e) => {
+        // ...unless you're typing in a box (like Stroke), where Backspace erases a character
+        if (e.target.tagName === "INPUT") return;
+
+        if (e.key === "Delete" || e.key === "Backspace")
+        {
+            e.preventDefault();
+            deleteSelected();
+        }
+    });
+
 
     // Load the bunny texture
     /*const texture = await Assets.load("./assets/bunny.png");
