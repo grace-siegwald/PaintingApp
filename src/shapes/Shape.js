@@ -1,4 +1,4 @@
-import { Graphics } from "pixi.js";
+import { Graphics, Polygon } from "pixi.js";
 
 export class Shape {
     constructor(start, style) 
@@ -84,11 +84,17 @@ export class Shape {
         this.end.x = center.x + (this.end.x - center.x) * factor;
         this.end.y = center.y + (this.end.y - center.y) * factor;
         this.redraw();
-}
+    }
+    
+    // Should the shape tool show a dashed box while this shape is being dragged out?
+    // Yes for shapes drawn inside a box. (Line overrides this, since it has no box)
+    get usesDragBox()
+    {
+        return true;
+    }
 
     // "Is this point inside me?" Used by the select tool.
-    // Default answer: is it inside my bounding box? Subclasses override this when
-    // the box is a bad fit for their shape (a circle's corners, a thin line)
+    // Default answer: is it inside my bounding box? Subclasses override this when the box is a bad fit for their shape (a circle's corners, a thin line)
     containsPoint(point)
     {
         return point.x >= this.x && point.x <= this.x + this.width &&
@@ -145,22 +151,58 @@ export class Circle extends Shape
 }
 
 // --- Star ---
+// The 10 corners of a star (5 points + 5 inner corners) on a circle of radius 1
+// around (0, 0), starting at the top point. Worked out once, when the file loads.
+const STAR_INNER = 0.5; // inner corners are half as far out as the points
+const UNIT_STAR = [];
+for (let i = 0; i < 10; i++)
+{
+    const angle = -Math.PI / 2 + i * Math.PI / 5;   // start pointing straight up, 36 degrees apart
+    const radius = (i % 2 === 0) ? 1 : STAR_INNER;  // even = point, odd = inner corner
+    UNIT_STAR.push({ x: Math.cos(angle) * radius, y: Math.sin(angle) * radius });
+}
+// The box around that star. It's NOT -1 to 1 on every side: the bottom points don't
+// reach as far down as the top point reaches up, and the side points don't reach x = 1
+const STAR_LEFT   = Math.min(...UNIT_STAR.map(p => p.x));
+const STAR_RIGHT  = Math.max(...UNIT_STAR.map(p => p.x));
+const STAR_TOP    = Math.min(...UNIT_STAR.map(p => p.y));
+const STAR_BOTTOM = Math.max(...UNIT_STAR.map(p => p.y));
+
 export class Star extends Shape 
 {
+    // Stretch the unit star so its own box lines up exactly with this shape's box:
+    // the top point touches the top edge, the side points touch the sides, and the
+    // two bottom points touch the bottom. (0 = left/top edge, 1 = right/bottom edge)
+    getCorners()
+    {
+        return UNIT_STAR.map(p => ({
+            x: this.x + (p.x - STAR_LEFT) / (STAR_RIGHT - STAR_LEFT) * this.width,
+            y: this.y + (p.y - STAR_TOP) / (STAR_BOTTOM - STAR_TOP) * this.height,
+        }));
+    }
+
     draw(graphics) 
     { 
-        // Pixi's star(centerX, centerY, numberOfPoints, radius) also works from the center
-        const radius = Math.min(this.width, this.height) / 2;
-        graphics.star(this.x + this.width / 2, this.y + this.height / 2, 5, radius);
+        graphics.poly(this.getCorners()); // a closed shape through all 10 corners
         this.applyStyle(graphics);
     }
 
-    // Need an undo and redo behavior, what they do when they redo undo
+    // Clicking between the points shouldn't select the star.
+    // Pixi's Polygon already knows how to answer "is this point inside me?"
+    containsPoint(point)
+    {
+        return new Polygon(this.getCorners()).contains(point.x, point.y);
+    }
 }
 
 // --- Line ---
 export class Line extends Shape // ignores the box and uses the two endpoints
 {   
+    get usesDragBox()
+    {
+        return false;
+    }
+    
     draw(graphics) 
     {
         graphics.moveTo(this.start.x, this.start.y)

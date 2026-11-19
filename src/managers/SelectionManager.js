@@ -108,6 +108,21 @@ class SelectionManager
     }
 
     hideMarquee() { this.marquee.clear(); }
+
+    // A thin dashed outline, showing the box a new shape is being drawn into 
+    // It uses the marquee's Graphics (they never show at the same time), so hideMarquee() hides it too
+    showDragBox(rect)
+    {
+        const left = rect.x, top = rect.y;
+        const right = rect.x + rect.width, bottom = rect.y + rect.height;
+
+        this.marquee.clear();
+        dashedLine(this.marquee, left, top, right, top);
+        dashedLine(this.marquee, right, top, right, bottom);
+        dashedLine(this.marquee, right, bottom, left, bottom);
+        dashedLine(this.marquee, left, bottom, left, top);
+        this.marquee.stroke({ width: 1, color: 0x2f80ed });
+    }
 }
 
 // Do two boxes touch? (x/y = TOP-LEFT corner, like our shapes)
@@ -115,6 +130,23 @@ function boxesOverlap(a, b)
 {
     return a.x <= b.x + b.width  && a.x + a.width  >= b.x &&
            a.y <= b.y + b.height && a.y + a.height >= b.y;
+}
+// Pixi has no dashed lines, so draw lots of short ones: 6px of line, 4px of gap, repeat
+function dashedLine(graphics, x1, y1, x2, y2, dash = 6, gap = 4)
+{
+    const length = Math.hypot(x2 - x1, y2 - y1);
+    if (length === 0) return;
+
+    // One step of 1px along the line
+    const stepX = (x2 - x1) / length;
+    const stepY = (y2 - y1) / length;
+
+    for (let d = 0; d < length; d += dash + gap)
+    {
+        const end = Math.min(d + dash, length); // don't run past the corner
+        graphics.moveTo(x1 + stepX * d, y1 + stepY * d)
+                .lineTo(x1 + stepX * end, y1 + stepY * end);
+    }
 }
 
 export default new SelectionManager();
