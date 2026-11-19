@@ -7,7 +7,10 @@ import SelectionManager from "./managers/SelectionManager.js";
 import "../style.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { Rectangle, Circle, Line, Star } from "./shapes/Shape.js";
-import { ShapeTool, SelectTool } from "./tools/Tool.js";
+import { ShapeTool } from "./tools/ShapeTool.js";
+import { SelectTool } from "./tools/SelectTool.js";
+import { MoveTool } from "./tools/MoveTool.js";
+
 
 // Used for initializing the app and setting up the tools on the left hand side
 (async () => {
@@ -32,7 +35,9 @@ import { ShapeTool, SelectTool } from "./tools/Tool.js";
     app.stage.addChild(selectionLayer);
     SelectionManager.initialize(selectionLayer);
 
+    // get the tools
     const selectTool = new SelectTool(drawingLayer);
+    const moveTool = new MoveTool();
 
     // Adding a shape tool, it takes in the currecnt fill and stroke colors and width
     const shapeTool = new ShapeTool(drawingLayer, () => ({
@@ -75,7 +80,7 @@ import { ShapeTool, SelectTool } from "./tools/Tool.js";
     }));
     
     ToolsManager.addTool(ToolsManager.getTool("Move Tool",["fa-solid","fa-up-down-left-right"], () => {
-        
+        ToolsManager.setActiveTool(moveTool);
     }));
     
     ToolsManager.addTool(ToolsManager.getTool("Scale Tool",["fa-solid","fa-up-right-and-down-left-from-center"], () => {

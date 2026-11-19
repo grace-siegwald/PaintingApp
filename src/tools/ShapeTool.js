@@ -1,3 +1,7 @@
+import { Tool } from "./Tool.js";
+import HistoryManager from "../managers/HistoryManager.js";
+import { DrawShapeAction } from "../actions/DrawShapeAction.js";
+
 // Shape tool extends the definition of a tool. It has a shape (this.ShapeClass)
 export class ShapeTool extends Tool {
     static State = Object.freeze({ IDLE: "idle", DRAGGING: "dragging" });   // JS's stand-in for an enum

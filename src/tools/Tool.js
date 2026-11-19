@@ -7,10 +7,6 @@
 /// OLD THOUGHTS ^^^^^^^^^
 
 import InputManager from "../managers/InputManager.js";
-import HistoryManager from "../managers/HistoryManager.js";
-import SelectionManager from "../managers/SelectionManager.js";
-import { DrawShapeAction } from "../actions/DrawShapeAction.js";
-
 
 // A TOOL is a base class that subscribes and unsubscribes to mouse events (on pointer down, move, and up).
 // It's the thing that talks with the input manager

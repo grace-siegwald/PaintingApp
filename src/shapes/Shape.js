@@ -37,7 +37,6 @@ export class Shape {
         return Math.abs(this.end.y - this.start.y);
     }
 
-    // this 
     redraw() 
     { 
         this.graphics.clear(); 
@@ -46,6 +45,15 @@ export class Shape {
     draw(graphics)  
     { 
         throw new Error(`${this.constructor.name} must implement draw(graphics)`);
+    }
+
+    moveBy(dx, dy) // moves the shape by changing its data, not moving the Pixi object around (wow!)
+    {
+        this.start.x += dx;
+        this.start.y += dy;
+        this.end.x += dx;
+        this.end.y += dy;
+        this.redraw();
     }
 
     // "Is this point inside me?" Used by the select tool.
