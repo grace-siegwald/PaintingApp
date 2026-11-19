@@ -136,7 +136,8 @@ import { Group } from "./shapes/Group.js";
 
         HistoryManager.execute(new DeleteShapeAction([...shapes], drawingLayer));
     };
-    // The Delete or Backspace key does the same thing + Ctrl+G and Ctrl+Shift+G for grouping and ungrouping
+    
+    // The Delete or Backspace key does the same thing || Ctrl+G and Ctrl+Shift+G for grouping and ungrouping || Ctrl+Z and Ctrl+Shift+Z for undo and redo
     document.addEventListener("keydown", (e) => {
         // ...unless you're typing in a box (like Stroke), where Backspace erases a character
         if (e.target.tagName === "INPUT") return;
@@ -154,6 +155,18 @@ import { Group } from "./shapes/Group.js";
             e.preventDefault(); // otherwise the browser does "find next"
             if (e.shiftKey) ungroupSelected();
             else groupSelected();
+        }
+
+        // Ctrl+Z = undo, Ctrl+Shift+Z = redo (Cmd instead of Ctrl on a Mac)
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z")
+        {
+            e.preventDefault();
+
+            // Don't undo halfway through a drag (the tool is still in the middle of its preview)
+            if (InputManager.getIsMouseDown()) return;
+
+            if (e.shiftKey) HistoryManager.redo();
+            else HistoryManager.undo();
         }
     });
 
